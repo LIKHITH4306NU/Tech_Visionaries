@@ -677,6 +677,39 @@
     color: var(--text-dim);
   }
 
+  .history-container {
+    background: rgba(0,10,20,0.9);
+    border: 1px solid rgba(0,64,96,0.7);
+    border-radius: 14px;
+    padding: 12px;
+    max-height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .history-entry {
+    background: rgba(0,15,30,0.85);
+    border: 1px solid rgba(0,64,96,0.6);
+    border-radius: 12px;
+    padding: 10px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .history-entry strong {
+    color: var(--text-bright);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .history-entry span {
+    display: block;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
   .empty-state {
     font-family: var(--font-mono);
     font-size: 10px;
@@ -1111,6 +1144,12 @@
     <div class="blacklist-container" id="blacklistContainer">
       <div class="empty-state" id="blacklistEmpty">No wallets blacklisted</div>
     </div>
+
+    <div class="panel-title" style="margin-top:4px;">Server Transaction History</div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:12px;" onclick="loadHistory()">Refresh History</button>
+    <div class="history-container" id="historyContainer">
+      <div class="empty-state">Stored transactions will appear here.</div>
+    </div>
   </div>
 
 </div>
@@ -1124,6 +1163,45 @@ const state = {
   blacklist: [],
   logEntries: [],
 };
+
+const API_BASE = '/api';
+
+async function submitTransaction(record) {
+  try {
+    await fetch(`${API_BASE}/transactions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record),
+    });
+  } catch (err) {
+    console.warn('Backend save failed', err);
+  }
+}
+
+async function loadHistory() {
+  const container = document.getElementById('historyContainer');
+  container.innerHTML = '<div class="empty-state">Loading history...</div>';
+  try {
+    const response = await fetch(`${API_BASE}/transactions`);
+    if (!response.ok) throw new Error('Unable to load history');
+    const transactions = await response.json();
+    if (!transactions.length) {
+      container.innerHTML = '<div class="empty-state">No saved transactions yet.</div>';
+      return;
+    }
+    container.innerHTML = transactions.slice(0, 12).map(t => `
+      <div class="history-entry">
+        <strong>${t.walletAddr.slice(0,16)}... — ${t.status.toUpperCase()}</strong>
+        <span>${new Date(t.timestamp).toLocaleString()}</span>
+        <span>Score: ${t.score} — ${t.decision}</span>
+        <span>${t.amount} ${t.currency} → ${t.receiverAddr.slice(0,16)}...</span>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = '<div class="empty-state">Unable to load history.</div>';
+    console.warn(err);
+  }
+}
 
 // ─── PRESETS ─────────────────────────────────────────────────────────────
 const PRESETS = {
@@ -1512,6 +1590,19 @@ function analyzeWallet() {
     setDecision(result.decision, addr);
     renderReasons(result.reasons);
 
+    const transactionRecord = {
+      walletAddr: addr,
+      receiverAddr: document.getElementById('receiverAddr').value.trim(),
+      amount: parseFloat(document.getElementById('txAmount').value) || 0,
+      currency: document.getElementById('currency').value,
+      network: document.getElementById('network').value,
+      score: result.score,
+      status: result.status,
+      decision: result.decision,
+      reasons: result.reasons,
+    };
+    submitTransaction(transactionRecord).then(loadHistory);
+
     // Log result
     const emoji = result.status === 'safe' ? '✔' : result.status === 'suspicious' ? '⚠' : '⛔';
     addLog(`${emoji} [${result.status.toUpperCase()}] ${addr.slice(0,16)}... — Score: ${result.score}/100`, result.status === 'safe' ? 'success' : result.status === 'malicious' ? 'error' : 'warn');
@@ -1655,6 +1746,7 @@ window.addEventListener('load', () => {
   ctx.fillStyle = 'rgba(0,212,255,0.2)';
   ctx.textAlign = 'center';
   ctx.fillText('[ SUBMIT WALLET TO VISUALIZE NETWORK ]', W/2, H/2);
+  loadHistory();
 });
 
 // Enter key support
