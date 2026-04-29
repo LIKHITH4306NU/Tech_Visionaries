@@ -77,6 +77,57 @@ app.get("/api/transactions", (req, res) => {
   });
 });
 
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    version: "2.4.1",
+    database: "connected",
+    uptime: process.uptime()
+  });
+});
+
+// Search transactions endpoint
+app.get("/api/transactions/search", (req, res) => {
+  const { wallet, status, decision, limit = 50 } = req.query;
+
+  let sql = "SELECT * FROM transactions WHERE 1=1";
+  const params = [];
+
+  if (wallet) {
+    sql += " AND (walletAddr LIKE ? OR receiverAddr LIKE ?)";
+    params.push(`%${wallet}%`, `%${wallet}%`);
+  }
+
+  if (status) {
+    sql += " AND status = ?";
+    params.push(status);
+  }
+
+  if (decision) {
+    sql += " AND decision = ?";
+    params.push(decision);
+  }
+
+  sql += " ORDER BY timestamp DESC LIMIT ?";
+  params.push(parseInt(limit));
+
+  db.all(sql, params, (err, rows) => {
+    if (err) {
+      console.error("Error searching transactions:", err);
+      return res.status(500).json({ message: "Failed to search transactions." });
+    }
+
+    const transactions = rows.map(row => ({
+      ...row,
+      reasons: row.reasons ? JSON.parse(row.reasons) : []
+    }));
+
+    res.json(transactions);
+  });
+});
+
 app.post("/api/transactions", (req, res) => {
   const payload = req.body;
   const required = ["walletAddr", "receiverAddr", "amount", "currency", "network", "score", "status", "decision"];

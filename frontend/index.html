@@ -945,6 +945,10 @@
       <div class="status-dot"></div>
       SYSTEM ONLINE
     </div>
+    <div class="status-pill" id="healthStatus" style="border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.05);">
+      <div class="status-dot" style="background: var(--safe);"></div>
+      SERVER HEALTHY
+    </div>
     <div class="threat-counter">
       THREATS BLOCKED: <span id="threatCount">0</span>
     </div>
@@ -1159,7 +1163,10 @@
     </div>
 
     <div class="panel-title" style="margin-top:4px;">Server Transaction History</div>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:12px;" onclick="loadHistory()">Refresh History</button>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input type="text" class="input-field" id="searchHistory" placeholder="Search transactions..." style="flex:1;font-size:11px;" />
+      <button class="btn btn-primary" onclick="loadHistory()" style="padding:8px 12px;font-size:10px;">Refresh</button>
+    </div>
     <div class="history-container" id="historyContainer">
       <div class="empty-state">Stored transactions will appear here.</div>
     </div>
@@ -1181,27 +1188,61 @@ const API_BASE = '/api';
 
 async function submitTransaction(record) {
   try {
-    await fetch(`${API_BASE}/transactions`, {
+    const response = await fetch(`${API_BASE}/transactions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(record),
     });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    addLog('Transaction saved to database', 'success');
   } catch (err) {
     console.warn('Backend save failed', err);
+    addLog('Failed to save transaction to database', 'error');
+    showAlert('⚠ Database connection issue — transaction logged locally only', 'warn');
   }
 }
 
-async function loadHistory() {
+async function checkServerHealth() {
+  const healthEl = document.getElementById('healthStatus');
+  try {
+    const response = await fetch(`${API_BASE}/health`);
+    if (response.ok) {
+      healthEl.style.borderColor = 'rgba(0,255,136,0.3)';
+      healthEl.style.background = 'rgba(0,255,136,0.05)';
+      healthEl.querySelector('.status-dot').style.background = 'var(--safe)';
+      healthEl.innerHTML = '<div class="status-dot"></div>SERVER HEALTHY';
+    } else {
+      throw new Error(`HTTP ${response.status}`);
+    }
+  } catch (err) {
+    healthEl.style.borderColor = 'rgba(255,45,85,0.3)';
+    healthEl.style.background = 'rgba(255,45,85,0.05)';
+    healthEl.querySelector('.status-dot').style.background = 'var(--danger)';
+    healthEl.innerHTML = '<div class="status-dot" style="background: var(--danger);"></div>SERVER OFFLINE';
+    addLog('Server health check failed', 'error');
+  }
+}
+
+async function loadHistory(searchTerm = '') {
   const container = document.getElementById('historyContainer');
   container.innerHTML = '<div class="empty-state">Loading history...</div>';
   try {
-    const response = await fetch(`${API_BASE}/transactions`);
-    if (!response.ok) throw new Error('Unable to load history');
+    let url = `${API_BASE}/transactions`;
+    if (searchTerm) {
+      url = `${API_BASE}/transactions/search?wallet=${encodeURIComponent(searchTerm)}`;
+    }
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const transactions = await response.json();
+
     if (!transactions.length) {
-      container.innerHTML = '<div class="empty-state">No saved transactions yet.</div>';
+      container.innerHTML = searchTerm
+        ? '<div class="empty-state">No transactions match your search.</div>'
+        : '<div class="empty-state">No saved transactions yet.</div>';
       return;
     }
+
     container.innerHTML = transactions.slice(0, 12).map(t => `
       <div class="history-entry">
         <strong>${t.walletAddr.slice(0,16)}... — ${t.status.toUpperCase()}</strong>
@@ -1211,8 +1252,9 @@ async function loadHistory() {
       </div>
     `).join('');
   } catch (err) {
-    container.innerHTML = '<div class="empty-state">Unable to load history.</div>';
-    console.warn(err);
+    container.innerHTML = '<div class="empty-state">Unable to load history. Server may be offline.</div>';
+    console.warn('History load failed:', err);
+    addLog('Failed to load transaction history', 'error');
   }
 }
 
@@ -1558,12 +1600,42 @@ const ANALYZING_MSGS = [
   'GENERATING AI EXPLANATION...',
 ];
 
-function analyzeWallet() {
+function validateInputs() {
   const addr = document.getElementById('walletAddr').value.trim();
+  const receiver = document.getElementById('receiverAddr').value.trim();
+  const amount = document.getElementById('txAmount').value;
+
   if (!addr) {
+    showAlert('⚠ Please enter a wallet address', 'warn');
     document.getElementById('walletAddr').focus();
-    return;
+    return false;
   }
+
+  if (addr.length < 20) {
+    showAlert('⚠ Wallet address appears too short', 'warn');
+    document.getElementById('walletAddr').focus();
+    return false;
+  }
+
+  if (!receiver) {
+    showAlert('⚠ Please enter a receiver address', 'warn');
+    document.getElementById('receiverAddr').focus();
+    return false;
+  }
+
+  if (!amount || parseFloat(amount) <= 0) {
+    showAlert('⚠ Please enter a valid transaction amount', 'warn');
+    document.getElementById('txAmount').focus();
+    return false;
+  }
+
+  return true;
+}
+
+function analyzeWallet() {
+  if (!validateInputs()) return;
+
+  const addr = document.getElementById('walletAddr').value.trim();
 
   // Check if already blacklisted
   if (state.blacklist.includes(addr)) {
@@ -1613,8 +1685,9 @@ function analyzeWallet() {
       status: result.status,
       decision: result.decision,
       reasons: result.reasons,
+      timestamp: new Date().toISOString(),
     };
-    submitTransaction(transactionRecord).then(loadHistory);
+    submitTransaction(transactionRecord).then(() => loadHistory());
 
     // Log result
     const emoji = result.status === 'safe' ? '✔' : result.status === 'suspicious' ? '⚠' : '⛔';
@@ -1759,7 +1832,23 @@ window.addEventListener('load', () => {
   ctx.fillStyle = 'rgba(0,212,255,0.2)';
   ctx.textAlign = 'center';
   ctx.fillText('[ SUBMIT WALLET TO VISUALIZE NETWORK ]', W/2, H/2);
+
+  // Initialize
   loadHistory();
+  checkServerHealth();
+
+  // Set up periodic health checks
+  setInterval(checkServerHealth, 30000); // Check every 30 seconds
+
+  // Search functionality
+  const searchInput = document.getElementById('searchHistory');
+  let searchTimeout;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      loadHistory(searchInput.value.trim());
+    }, 300);
+  });
 });
 
 // Enter key support
