@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1777423742540,
+    "timestamp": "2026-04-29T00:49:02.540Z",
+    "walletAddr": "0x7f9e2a3b4c5d6e7f8a9b0c1d2e3f4a5b",
+    "receiverAddr": "0xa1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+    "amount": 0.25,
+    "currency": "ETH",
+    "network": "ethereum",
+    "score": 12,
+    "status": "safe",
+    "decision": "allow",
+    "reasons": [
+      {
+        "text": "Transaction frequency within normal range (3.2/day)",
+        "type": "safe"
+      },
+      {
+        "text": "No flagged wallet connections detected",
+        "type": "safe"
+      },
+      {
+        "text": "Transaction amount is below anomaly threshold",
+        "type": "safe"
+      }
+    ]
+  },
+  {
+    "id": 1777423733018,
+    "timestamp": "2026-04-29T00:48:53.018Z",
+    "walletAddr": "0x7f9e2a3b4c5d6e7f8a9b0c1d2e3f4a5b",
+    "receiverAddr": "0xa1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+    "amount": 0.25,
+    "currency": "ETH",
+    "network": "ethereum",
+    "score": 12,
+    "status": "safe",
+    "decision": "allow",
+    "reasons": [
+      {
+        "text": "Transaction frequency within normal range (3.2/day)",
+        "type": "safe"
+      },
+      {
+        "text": "No flagged wallet connections detected",
+        "type": "safe"
+      },
+      {
+        "text": "Transaction amount is below anomaly threshold",
+        "type": "safe"
+      }
+    ]
+  },
+  {
+    "id": 1777423714689,
+    "timestamp": "2026-04-29T00:48:34.689Z",
+    "walletAddr": "0x7f9e2a3b4c5d6e7f8a9b0c1d2e3f4a5b",
+    "receiverAddr": "0xa1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+    "amount": 0.25,
+    "currency": "ETH",
+    "network": "ethereum",
+    "score": 12,
+    "status": "safe",
+    "decision": "allow",
+    "reasons": [
+      {
+        "text": "Transaction frequency within normal range (3.2/day)",
+        "type": "safe"
+      },
+      {
+        "text": "No flagged wallet connections detected",
+        "type": "safe"
+      },
+      {
+        "text": "Transaction amount is below anomaly threshold",
+        "type": "safe"
+      }
+    ]
+  }
+]

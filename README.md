@@ -1,82 +1,43 @@
-# **1. Project Overview**
+# Tech Visionaries
 
-The **AI Crypto Defense & Threat Containment System** is a web-based application designed to analyze blockchain wallet addresses and detect potential threats such as:
+This repository now includes a full frontend and backend setup for the AI Crypto Defense system.
 
-* Fraudulent wallets
-* Suspicious transaction patterns
-* Malicious or ransomware-linked addresses
+## Project Structure
 
-The system assigns a **risk score (0–100)** and classifies wallets into three categories:
+- `frontend/` - Contains the HTML, CSS, and JavaScript for the client-side application
+- `backend/` - Contains the Node.js server, API, and data storage
+- `README.md` - This documentation file
+- `.gitignore` - Git ignore rules
 
-* Safe
-* Suspicious
-* Malicious
+## Run locally
 
-Based on this classification, the system performs automated actions such as:
+1. Install backend dependencies:
 
-* Allowing transactions
-* Delaying transactions for verification
-* Blocking and blacklisting wallets
+   cd backend
+   npm install
 
-The primary objective is to simulate an **AI-powered cybersecurity layer for blockchain transactions**.
+2. Start the backend and frontend server:
 
----
+   npm start
 
-# **2. Tech Stack**
+3. Open your browser and visit:
 
-## **Frontend**
+   http://localhost:3000
 
-* HTML, CSS, JavaScript
-* Features:
+## Mobile access
 
-  * Risk gauge visualization
-  * Real-time logs
-  * Dynamic threat indicators
+If you want to open the app from a smartphone on the same Wi-Fi network, use your computer's local IP address instead of `localhost`. For example:
 
----
+`http://192.168.1.100:3000`
 
-## **Backend**
+Do not use `localhost` on the phone because that resolves to the phone itself.
 
-* Node.js
-* Express.js
-* CORS (Cross-Origin Resource Sharing)
+## Features
 
----
-
-## **Optional AI Layer (Advanced Version)**
-
-* Claude AI API
-* Used for intelligent wallet analysis with structured JSON responses
-
----
-
-## **Storage**
-
-* In-memory storage:
-
-  * Blacklist (Set/Array)
-  * System statistics (analyzed, blocked)
-
----
-
-# **3. Method of Implementation**
-
----
-
-## **Step 1: User Input**
-
-The user provides:
-
-* Wallet address
-* Blockchain network (Ethereum, Bitcoin, etc.)
-* Transaction amount
-* Receiver address
-
----
-
-## **Step 2: API Request**
-
-The frontend sends an HTTP request to the backend:
+- Frontend UI served from `frontend/index.html`
+- Backend API serving `/api/transactions`
+- Transaction history persisted in `backend/data/transactions.json`
+- Frontend saves each analyzed transaction to the backend and loads stored history
 
 ---
 

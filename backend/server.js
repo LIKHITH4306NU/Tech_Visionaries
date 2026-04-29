@@ -11,7 +11,7 @@ const DATA_FILE = path.join(DATA_DIR, "transactions.json");
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 async function ensureDataFile() {
   try {
