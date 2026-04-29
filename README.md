@@ -17,25 +17,27 @@ This repository contains a full-stack AI-powered cryptocurrency transaction anal
 - **Mobile Responsive**: Works on desktop and mobile devices
 - **Network Access**: Accessible from any device on the same network
 
-## Database Schema
+## Database Management
 
-The application uses SQLite to store transaction data with the following schema:
+The application includes a database management script for maintenance tasks:
 
-```sql
-CREATE TABLE transactions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  timestamp TEXT NOT NULL,
-  walletAddr TEXT NOT NULL,
-  receiverAddr TEXT NOT NULL,
-  amount REAL NOT NULL,
-  currency TEXT NOT NULL,
-  network TEXT NOT NULL,
-  score INTEGER NOT NULL,
-  status TEXT NOT NULL,
-  decision TEXT NOT NULL,
-  reasons TEXT
-);
+```bash
+# View database statistics
+cd backend
+node db-manager.js stats
+
+# Clean old transactions (keep last 1000)
+node db-manager.js clean 1000
 ```
+
+## API Endpoints
+
+- `GET /api/transactions` - Retrieve all transactions
+- `POST /api/transactions` - Save a new transaction analysis
+
+## Data Migration
+
+If you have existing JSON data, the migration script will automatically transfer it to SQLite on first run.
 
 ## Run locally
 
