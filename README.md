@@ -26,6 +26,9 @@ The application includes a database management script for maintenance tasks:
 cd backend
 node db-manager.js stats
 
+# View all transaction entries in detail
+node view-db.js
+
 # Clean old transactions (keep last 1000)
 node db-manager.js clean 1000
 ```
