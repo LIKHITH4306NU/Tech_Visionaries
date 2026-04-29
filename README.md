@@ -1,24 +1,56 @@
-# Tech Visionaries
+# Tech Visionaries - AI Crypto Defense System
 
-This repository now includes a full frontend and backend setup for the AI Crypto Defense system.
+This repository contains a full-stack AI-powered cryptocurrency transaction analysis and threat detection system.
 
 ## Project Structure
 
 - `frontend/` - Contains the HTML, CSS, and JavaScript for the client-side application
-- `backend/` - Contains the Node.js server, API, and data storage
+- `backend/` - Contains the Node.js server, API, and SQLite database
 - `README.md` - This documentation file
 - `.gitignore` - Git ignore rules
+
+## Features
+
+- **AI-Powered Risk Analysis**: Machine learning-based wallet and transaction risk scoring
+- **Real-time Threat Detection**: Automated analysis of blockchain transactions
+- **Persistent Data Storage**: SQLite database for transaction history and risk assessments
+- **Mobile Responsive**: Works on desktop and mobile devices
+- **Network Access**: Accessible from any device on the same network
+
+## Database Schema
+
+The application uses SQLite to store transaction data with the following schema:
+
+```sql
+CREATE TABLE transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  timestamp TEXT NOT NULL,
+  walletAddr TEXT NOT NULL,
+  receiverAddr TEXT NOT NULL,
+  amount REAL NOT NULL,
+  currency TEXT NOT NULL,
+  network TEXT NOT NULL,
+  score INTEGER NOT NULL,
+  status TEXT NOT NULL,
+  decision TEXT NOT NULL,
+  reasons TEXT
+);
+```
 
 ## Run locally
 
 1. Install backend dependencies:
 
+   ```bash
    cd backend
    npm install
+   ```
 
 2. Start the backend and frontend server:
 
+   ```bash
    npm start
+   ```
 
 3. Open your browser and visit:
 
