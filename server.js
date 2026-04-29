@@ -1,4 +1,5 @@
 const fs = require("fs").promises;
+const os = require("os");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
@@ -73,6 +74,23 @@ app.post("/api/transactions", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+function getLocalIp() {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+  return null;
+}
+
+const HOST = '0.0.0.0';
+app.listen(PORT, HOST, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  const localIp = getLocalIp();
+  if (localIp) {
+    console.log(`Access from other devices: http://${localIp}:${PORT}`);
+  }
 });

@@ -78,6 +78,17 @@ The user provides:
 
 The frontend sends an HTTP request to the backend:
 
+---
+
+## Mobile access
+
+If you want to open the app from a smartphone on the same Wi-Fi network, use your computer’s local IP address instead of `localhost`. For example:
+
+`http://192.168.1.100:3000`
+
+Do not use `localhost` on the phone because that resolves to the phone itself.
+
+
 ```http
 POST /analyze
 ```

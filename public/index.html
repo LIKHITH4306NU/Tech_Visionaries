@@ -905,9 +905,22 @@
 
   @media (max-width: 700px) {
     header { padding: 16px 20px; }
-    .main-grid { grid-template-columns: 1fr; }
+    .logo-group { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .header-status { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: 100%; margin-top: 12px; }
+    .status-pill, .threat-counter { width: 100%; justify-content: flex-start; }
+    .threat-counter { font-size: 13px; }
+    .main-grid { grid-template-columns: 1fr; gap: 16px; padding: 0 10px 20px; }
     .panel-left, .panel-center, .panel-decision, .panel-right { grid-column: 1; grid-row: auto; }
-    .logo-text h1 { font-size: 10px; }
+    .panel { padding: 18px 14px; }
+    .logo-text h1 { font-size: 18px; line-height: 1.2; }
+    .logo-text p { font-size: 12px; }
+    .panel-title { font-size: 15px; }
+    .input-field, .btn, .preset-btn { width: 100%; }
+    .preset-btn { justify-content: center; }
+    .btn { min-height: 48px; }
+    .graph-canvas { min-height: 220px; }
+    .history-container, .blacklist-container, .log-container { max-height: none; min-height: 140px; }
+    .stat-item { min-width: 0; }
   }
 </style>
 </head>
